@@ -33,7 +33,8 @@ const signup = async (req, res, next) => {
         errorCode: 400,
       });
     }
-    const hashedPassword = await hashPassword(password);
+    // const hashedPassword = await hashPassword(password);
+       const hashedPassword = password;   // for testing, remove this line and uncomment above line in production
 
    const { data, error: userError } = await supabase
   .from("User")
@@ -100,7 +101,8 @@ const login = async (req, res, next) => {
       });
     }
 
-    const isPasswordCorrect = await comparePassword(password, user.password);
+    // const isPasswordCorrect = await comparePassword(password, user.password);
+       const isPasswordCorrect = password === user.password;   // for testing, remove this line and uncomment above line in production 
 
     if (!isPasswordCorrect) {
       return res.status(400).json({

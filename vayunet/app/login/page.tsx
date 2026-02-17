@@ -1,13 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-const router = useRouter();
+  const router = useRouter();
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -17,7 +16,7 @@ const router = useRouter();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
@@ -26,7 +25,7 @@ const router = useRouter();
       if (isLogin) {
         // LOGIN
         const res = await axios.post(
-          "http://localhost:5000/api/login",
+          "http://localhost:5000/api/auth/login",
           { email, password },
           { withCredentials: true }
         );
@@ -37,24 +36,22 @@ const router = useRouter();
       } else {
         // SIGNUP
         const res = await axios.post(
-          "http://localhost:5000/api/signup",
+          "http://localhost:5000/api/auth/signup",
           {
-            full_name: fullName,
+            name: fullName, // ✅ FIXED: Changed from 'full_name' to 'name' to match backend
             email,
             password,
-            phone,
+            // phone, // Note: Your backend currently ignores this field. See 'Next Steps' below.
           },
           { withCredentials: true }
         );
 
         setMessage("✅ " + res.data.message);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        router.push("/home");
-
-        // Switch to login after signup (optional)
+        // Switch to login view after successful signup so they can log in
         setIsLogin(true);
       }
     } catch (error) {
+      console.error(error);
       setMessage(
         "❌ " + (error.response?.data?.message || "Something went wrong")
       );
@@ -71,7 +68,9 @@ const router = useRouter();
         </h3>
 
         {message && (
-          <div className="alert alert-info text-center">{message}</div>
+          <div className={`alert text-center ${message.startsWith("✅") ? "alert-success" : "alert-danger"}`}>
+            {message}
+          </div>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -150,7 +149,7 @@ const router = useRouter();
               Don’t have an account?{" "}
               <span
                 className="text-primary"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", textDecoration: "underline" }}
                 onClick={() => {
                   setIsLogin(false);
                   setMessage("");
@@ -164,7 +163,7 @@ const router = useRouter();
               Already have an account?{" "}
               <span
                 className="text-success"
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", textDecoration: "underline" }}
                 onClick={() => {
                   setIsLogin(true);
                   setMessage("");
